@@ -2,7 +2,7 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
-  entry: ['babel-polyfill', path.join(__dirname, "src/dapp")],
+  entry: ['core-js/stable', 'regenerator-runtime/runtime', path.join(__dirname, "src/dapp")],
   output: {
     path: path.join(__dirname, "prod/dapp"),
     filename: "bundle.js"
@@ -20,9 +20,7 @@ module.exports = {
       },
       {
         test: /\.(png|svg|jpg|gif)$/,
-        use: [
-          'file-loader'
-        ]
+        use: ['file-loader']
       },
       {
         test: /\.html$/,
@@ -32,7 +30,7 @@ module.exports = {
     ]
   },
   plugins: [
-    new HtmlWebpackPlugin({ 
+    new HtmlWebpackPlugin({
       template: path.join(__dirname, "src/dapp/index.html")
     })
   ],
@@ -40,8 +38,14 @@ module.exports = {
     extensions: [".js"]
   },
   devServer: {
-    contentBase: path.join(__dirname, "dapp"),
-    port: 8000,
-    stats: "minimal"
+    static: {
+      directory: path.join(__dirname, "dapp"),
+    },
+    port: 8001,
+    client: {
+      logging: 'info',  // Adjusts the level of logs seen on the browser, alternative to 'stats'
+    },
+    compress: true,  // Enables gzip compression
+    open: true  // Opens the browser after the server is started
   }
 };

@@ -1,5 +1,5 @@
 const FlightSuretyApp = artifacts.require("FlightSuretyApp");
-const FlightSuretyData = artifacts.require("FlightSuretyData");
+const FlightSuretyData = artifacts.require("FlightSuretyDataImpl.sol");
 const fs = require('fs');
 
 module.exports = function(deployer) {

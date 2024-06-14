@@ -1,186 +1,40 @@
-pragma solidity ^0.4.25;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 
-import "../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
+abstract contract FlightSuretyData {
+    function setIsAuthorizedCaller(address _address, bool isAuthorized) public virtual;
 
-contract FlightSuretyData {
-    using SafeMath for uint256;
+    function createAirline(address airlineAddress, bool isVoter) public virtual;
 
-    /********************************************************************************************/
-    /*                                       DATA VARIABLES                                     */
-    /********************************************************************************************/
+    function addFunds(uint _funds) public virtual;
 
-    address private contractOwner;                                      // Account used to deploy contract
-    bool private operational = true;                                    // Blocks all state changes throughout the contract if false
+    function getAirlinesCount() public view virtual returns (uint);
 
-    /********************************************************************************************/
-    /*                                       EVENT DEFINITIONS                                  */
-    /********************************************************************************************/
+    function createInsurance(uint _flightId, uint _amountPaid, address _owner) public virtual;
 
+    function getInsurance(uint _id) public view virtual returns (uint id, uint flightId, string memory state, uint amountPaid, address owner);
 
-    /**
-    * @dev Constructor
-    *      The deploying account becomes contractOwner
-    */
-    constructor
-                                (
-                                ) 
-                                public 
-    {
-        contractOwner = msg.sender;
-    }
+    function createFlight(string memory _code, uint _departureTimestamp, address _airlineAddress) public virtual;
 
-    /********************************************************************************************/
-    /*                                       FUNCTION MODIFIERS                                 */
-    /********************************************************************************************/
+    function getFlight(uint _id) public view virtual returns (string memory code, uint departureTimestamp, uint8 departureStatusCode, uint updated);
 
-    // Modifiers help avoid duplication of code. They are typically used to validate something
-    // before a function is allowed to be executed.
+    function getInsurancesByFlight(uint _flightId) public view virtual returns (uint[] memory);
 
-    /**
-    * @dev Modifier that requires the "operational" boolean variable to be "true"
-    *      This is used on all state changing functions to pause the contract in 
-    *      the event there is an issue that needs to be fixed
-    */
-    modifier requireIsOperational() 
-    {
-        require(operational, "Contract is currently not operational");
-        _;  // All modifiers require an "_" which indicates where the function body will be added
-    }
+    function creditInsurance(uint _id, uint _amountToCredit) public virtual;
 
-    /**
-    * @dev Modifier that requires the "ContractOwner" account to be the function caller
-    */
-    modifier requireContractOwner()
-    {
-        require(msg.sender == contractOwner, "Caller is not contract owner");
-        _;
-    }
+    function getAirline(address _address) public view virtual returns (address, uint, bool);
 
-    /********************************************************************************************/
-    /*                                       UTILITY FUNCTIONS                                  */
-    /********************************************************************************************/
+    function setAirlineIsVoter(address _address, bool isVoter) public virtual;
 
-    /**
-    * @dev Get operating status of contract
-    *
-    * @return A bool that is the current operating status
-    */      
-    function isOperational() 
-                            public 
-                            view 
-                            returns(bool) 
-    {
-        return operational;
-    }
+    function setDepartureStatusCode(uint _flightId, uint8 _statusCode) public virtual;
 
+    function setUnavailableForInsurance(uint flightId) public virtual;
 
-    /**
-    * @dev Sets contract operations on/off
-    *
-    * When operational mode is disabled, all write transactions except for this one will fail
-    */    
-    function setOperatingStatus
-                            (
-                                bool mode
-                            ) 
-                            external
-                            requireContractOwner 
-    {
-        operational = mode;
-    }
+    function getFlightIdByKey(bytes32 key) public view virtual returns (uint);
 
-    /********************************************************************************************/
-    /*                                     SMART CONTRACT FUNCTIONS                             */
-    /********************************************************************************************/
+    function createFlightKey(address _airlineAddress, string memory flightCode, uint timestamp) public virtual returns (bytes32);
 
-   /**
-    * @dev Add an airline to the registration queue
-    *      Can only be called from FlightSuretyApp contract
-    *
-    */   
-    function registerAirline
-                            (   
-                            )
-                            external
-                            pure
-    {
-    }
+    function withdrawCreditedAmount(uint _amountToWithdraw, address _address) public virtual payable;
 
-
-   /**
-    * @dev Buy insurance for a flight
-    *
-    */   
-    function buy
-                            (                             
-                            )
-                            external
-                            payable
-    {
-
-    }
-
-    /**
-     *  @dev Credits payouts to insurees
-    */
-    function creditInsurees
-                                (
-                                )
-                                external
-                                pure
-    {
-    }
-    
-
-    /**
-     *  @dev Transfers eligible payout funds to insuree
-     *
-    */
-    function pay
-                            (
-                            )
-                            external
-                            pure
-    {
-    }
-
-   /**
-    * @dev Initial funding for the insurance. Unless there are too many delayed flights
-    *      resulting in insurance payouts, the contract should be self-sustaining
-    *
-    */   
-    function fund
-                            (   
-                            )
-                            public
-                            payable
-    {
-    }
-
-    function getFlightKey
-                        (
-                            address airline,
-                            string memory flight,
-                            uint256 timestamp
-                        )
-                        pure
-                        internal
-                        returns(bytes32) 
-    {
-        return keccak256(abi.encodePacked(airline, flight, timestamp));
-    }
-
-    /**
-    * @dev Fallback function for funding smart contract.
-    *
-    */
-    function() 
-                            external 
-                            payable 
-    {
-        fund();
-    }
-
-
+    function getCreditedAmount(address _address) public view virtual returns (uint);
 }
-
