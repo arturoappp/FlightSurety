@@ -1,40 +1,60 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-abstract contract FlightSuretyData {
-    function setIsAuthorizedCaller(address _address, bool isAuthorized) public virtual;
+import "./base/Core.sol";
 
-    function createAirline(address airlineAddress, bool isVoter) public virtual;
+abstract contract FlightSuretyData is Core {
 
-    function addFunds(uint _funds) public virtual;
 
-    function getAirlinesCount() public view virtual returns (uint);
+    uint256 public numAirlines;
+    mapping(address => bool) public airlines;
+    mapping(address => uint256) public funds;
+    mapping(address => address[]) public airlineVotes;
 
-    function createInsurance(uint _flightId, uint _amountPaid, address _owner) public virtual;
+    // Passenger-related mappings
+    mapping(bytes32 => Insurance) public insurances;
+    mapping(address => uint256) public passengerCredits;
 
-    function getInsurance(uint _id) public view virtual returns (uint id, uint flightId, string memory state, uint amountPaid, address owner);
+    uint public insuranceCount;
+    enum InsuranceState {Active, Expired, Credited}
+    struct Insurance {
+        address passenger;
+        uint256 amount;
+        bool credited;
+    }
 
-    function createFlight(string memory _code, uint _departureTimestamp, address _airlineAddress) public virtual;
+    event AirlineRegistered(address airlineAddress);
+    event AirlineFunded(address airlineAddress);
+    event InsurancePurchased(address passenger, bytes32 flightKey, uint256 amount);
+    event PassengerCredited(address passenger, uint256 amount);
+    event PassengerWithdrawn(address passenger, uint256 amount);
 
-    function getFlight(uint _id) public view virtual returns (string memory code, uint departureTimestamp, uint8 departureStatusCode, uint updated);
+    constructor() {
+        airlines[contractOwner] = true;
+        numAirlines = 1;
+    }
 
-    function getInsurancesByFlight(uint _flightId) public view virtual returns (uint[] memory);
+    function isAirlineRegistered(address _airline) external view virtual returns (bool);
+    function registerAirline(address _newAirline) external virtual;
+    function voteToRegisterAirline(address _newAirline, address _voter) external virtual;
+    function fundAirline(address _airline) external payable virtual;
+    function isFunded(address _airline) external view virtual returns (bool);
+    function getNumAirlines() external view virtual returns (uint256);
+    function getAirlineVotes(address _airline) external view virtual returns (uint256);
 
-    function creditInsurance(uint _id, uint _amountToCredit) public virtual;
+    // Passenger-related functions
+    function buyInsurance(address passenger, bytes32 flightKey, uint256 amount) external virtual;
+    function creditInsurees(bytes32 flightKey) external virtual;
+    function pay(address passenger) external virtual;
+    function getPassengerCredit(address passenger) external view virtual returns (uint256);
+    function getInsurance(bytes32 flightKey) external view virtual returns (Insurance memory);
 
-    function getAirline(address _address) public view virtual returns (address, uint, bool);
+    // Function to get the contract's balance
+    function getContractBalance() external view virtual returns (uint256);
 
-    function setAirlineIsVoter(address _address, bool isVoter) public virtual;
+    // Fallback function to receive Ether
+    receive() external payable virtual;
 
-    function setDepartureStatusCode(uint _flightId, uint8 _statusCode) public virtual;
+    fallback() external payable virtual;
 
-    function setUnavailableForInsurance(uint flightId) public virtual;
-
-    function getFlightIdByKey(bytes32 key) public view virtual returns (uint);
-
-    function createFlightKey(address _airlineAddress, string memory flightCode, uint timestamp) public virtual returns (bytes32);
-
-    function withdrawCreditedAmount(uint _amountToWithdraw, address _address) public virtual payable;
-
-    function getCreditedAmount(address _address) public view virtual returns (uint);
 }

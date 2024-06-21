@@ -2,9 +2,12 @@
 pragma solidity ^0.8.0;
 
 contract Core {
-    address private contractOwner;                                      // Account used to deploy contract
+    address public contractOwner;                                      // Account used to deploy contract
     bool private operational = true;
 
+    constructor() {
+        contractOwner = msg.sender;
+    }
 
     modifier requireContractOwner(){
         require(msg.sender == contractOwner, "Caller is not contract owner");
@@ -20,7 +23,7 @@ contract Core {
     /*                                       UTILITY FUNCTIONS                                  */
     /********************************************************************************************/
 
-    function isOperational() public returns (bool){
+    function isOperational() public view returns (bool){
         return operational;  // *** done *** Modify to call data contract's status
     }
 
