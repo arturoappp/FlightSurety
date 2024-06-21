@@ -2,6 +2,7 @@
 pragma solidity 0.8.26;
 
 import "./FlightSuretyData.sol";
+import "./base/Core.sol";
 
 // It's important to avoid vulnerabilities due to numeric overflow bugs
 // OpenZeppelin's SafeMath library, when used correctly, protects agains such bugs
@@ -10,7 +11,7 @@ import "./FlightSuretyData.sol";
 /************************************************** */
 /* FlightSurety Smart Contract                      */
 /************************************************** */
-contract FlightSuretyApp {
+contract FlightSuretyApp is Core {
 
     FlightSuretyData flightSuretyData;
 
@@ -27,7 +28,6 @@ contract FlightSuretyApp {
     uint8 private constant STATUS_CODE_LATE_OTHER = 50;
 
     address private contractOwner;          // Account used to deploy contract
-    bool private operational = true;
 
     struct Flight {
         bool isRegistered;
@@ -64,27 +64,7 @@ contract FlightSuretyApp {
     /*                                       FUNCTION MODIFIERS                                 */
     /********************************************************************************************/
 
-    // Modifiers help avoid duplication of code. They are typically used to validate something
-    // before a function is allowed to be executed.
 
-    /**
-    * @dev Modifier that requires the "operational" boolean variable to be "true"
-    *      This is used on all state changing functions to pause the contract in 
-    *      the event there is an issue that needs to be fixed
-    */
-    modifier requireIsOperational(){
-        //*** done ** Modify to call data contract's status
-        require(operational, "Contract is currently not operational");
-        _;  // All modifiers require an "_" which indicates where the function body will be added
-    }
-
-    /**
-    * @dev Modifier that requires the "ContractOwner" account to be the function caller
-    */
-    modifier requireContractOwner(){
-        require(msg.sender == contractOwner, "Caller is not contract owner");
-        _;
-    }
 
     modifier verifyCallerIsRegisteredAirline(){
         // Below call will fail, b/c flightSuretyData.getAirline has modifies, that checks if the airline exists
@@ -92,17 +72,6 @@ contract FlightSuretyApp {
         _;
     }
 
-    /********************************************************************************************/
-    /*                                       UTILITY FUNCTIONS                                  */
-    /********************************************************************************************/
-
-    function isOperational() public returns(bool){
-        return operational;  // *** done *** Modify to call data contract's status
-    }
-
-    function setOperatingStatus(bool mode) external requireContractOwner {
-        operational = mode;
-    }
 
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */
