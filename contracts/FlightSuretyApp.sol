@@ -12,7 +12,6 @@ import "./base/Core.sol";
 /* FlightSurety Smart Contract                      */
 /************************************************** */
 contract FlightSuretyApp is Core {
-
     FlightSuretyData flightSuretyData;
 
     // Oracle related variables
@@ -75,6 +74,10 @@ contract FlightSuretyApp is Core {
         return true;
     }
 
+    function voteToRegisterAirline(address _airline) external onlyFundedAirline {
+        flightSuretyData.voteToRegisterAirline(_airline, msg.sender);
+    }
+
     function fundAirline() external payable {
         require(msg.value == 10 ether, "Funding requires 10 ether.");
         flightSuretyData.fundAirline{value: msg.value}(msg.sender);
@@ -100,6 +103,11 @@ contract FlightSuretyApp is Core {
         });
 
         emit FlightRegistered(airline, flight, timestamp);
+    }
+
+    function buyInsurance(bytes32 flightKey) external payable {
+        require(msg.value <= 1 ether, "Insurance purchase limited to 1 ether.");
+        flightSuretyData.buyInsurance{value: msg.value}(msg.sender, flightKey, msg.value);
     }
 
     function getFlightKey(address airline, string memory flight, uint256 timestamp) pure internal returns (bytes32) {
@@ -187,7 +195,9 @@ contract FlightSuretyApp is Core {
         if (statusCode == 20) { // Late Airline
             flightSuretyData.creditInsurees(flightKey);
         }
-
     }
-// endregion
+
+    function pay() external {
+        flightSuretyData.pay(msg.sender);
+    }
 }

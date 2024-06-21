@@ -4,8 +4,6 @@ pragma solidity ^0.8.0;
 import "./base/Core.sol";
 
 abstract contract FlightSuretyData is Core {
-
-
     uint256 public numAirlines;
     mapping(address => bool) public airlines;
     mapping(address => uint256) public funds;
@@ -15,8 +13,6 @@ abstract contract FlightSuretyData is Core {
     mapping(bytes32 => Insurance) public insurances;
     mapping(address => uint256) public passengerCredits;
 
-    uint public insuranceCount;
-    enum InsuranceState {Active, Expired, Credited}
     struct Insurance {
         address passenger;
         uint256 amount;
@@ -43,10 +39,11 @@ abstract contract FlightSuretyData is Core {
     function getAirlineVotes(address _airline) external view virtual returns (uint256);
 
     // Passenger-related functions
-    function buyInsurance(address passenger, bytes32 flightKey, uint256 amount) external virtual;
+    function buyInsurance(address passenger, bytes32 flightKey, uint256 amount) external payable virtual;
     function creditInsurees(bytes32 flightKey) external virtual;
     function pay(address passenger) external virtual;
     function getPassengerCredit(address passenger) external view virtual returns (uint256);
+
     function getInsurance(bytes32 flightKey) external view virtual returns (Insurance memory);
 
     // Function to get the contract's balance
@@ -56,5 +53,4 @@ abstract contract FlightSuretyData is Core {
     receive() external payable virtual;
 
     fallback() external payable virtual;
-
 }

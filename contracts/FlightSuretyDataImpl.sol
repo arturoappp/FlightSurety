@@ -102,7 +102,7 @@ contract FlightSuretyDataImpl is FlightSuretyData {
     }
 
     // Passenger-related functions
-    function buyInsurance(address passenger, bytes32 flightKey, uint256 amount) external override {
+    function buyInsurance(address passenger, bytes32 flightKey, uint256 amount) external payable override {
         require(msg.sender == appContract, "Caller is not authorized");
         insurances[flightKey] = Insurance({
             passenger: passenger,
